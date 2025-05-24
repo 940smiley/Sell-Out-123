@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>eBay Master - Web Edition</title>
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fab fa-ebay"></i> eBay Master Web
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="navbar-text" id="userInfo">Not Connected</span>
+                <button class="btn btn-outline-light ms-2" id="logoutBtn" style="display: none;">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        <!-- Authentication Section -->
+        <div id="authSection" class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card">
+                    <div class="card-header">
+                        <h3><i class="fas fa-key"></i> Connect to eBay</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="authForm">
+                            <div class="mb-3">
+                                <label for="appId" class="form-label">eBay App ID</label>
+                                <input type="text" class="form-control" id="appId" required>
+                                <div class="form-text">Your eBay Application ID</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="certId" class="form-label">Certificate ID</label>
+                                <input type="text" class="form-control" id="certId" required>
+                                <div class="form-text">Your eBay Certificate ID</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="devId" class="form-label">Developer ID</label>
+                                <input type="text" class="form-control" id="devId" required>
+                                <div class="form-text">Your eBay Developer ID</div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="ruName" class="form-label">RuName</label>
+                                <input type="text" class="form-control" id="ruName" required>
+                                <div class="form-text">Your eBay RuName for OAuth</div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="sandboxMode">
+                                    <label class="form-check-label" for="sandboxMode">
+                                        Use Sandbox Environment
+                                    </label>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-link"></i> Connect to eBay
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Application -->
+        <div id="mainApp" style="display: none;">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-md-3">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-bars"></i> Menu</h5>
+                        </div>
+                        <div class="list-group list-group-flush">
+                            <a href="#" class="list-group-item list-group-item-action active" data-section="listings">
+                                <i class="fas fa-list"></i> Active Listings
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action" data-section="ai-identify">
+                                <i class="fas fa-robot"></i> AI Product Identify
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action" data-section="draft-generator">
+                                <i class="fas fa-edit"></i> Draft Generator
+                            </a>
+                            <a href="#" class="list-group-item list-group-item-action" data-section="settings">
+                                <i class="fas fa-cog"></i> Settings
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-md-9">
+                    <!-- Active Listings Section -->
+                    <div id="listings-section" class="content-section">
+                        <div class="card">
+                            <div class="card-header d-flex justify-content-between">
+                                <h5><i class="fas fa-list"></i> Active Listings</h5>
+                                <button class="btn btn-sm btn-primary" id="refreshListings">
+                                    <i class="fas fa-sync"></i> Refresh
+                                </button>
+                            </div>
+                            <div class="card-body">
+                                <div id="listingsLoader" class="text-center" style="display: none;">
+                                    <div class="spinner-border" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <p>Loading your eBay listings...</p>
+                                </div>
+                                <div id="listingsTable"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Product Identify Section -->
+                    <div id="ai-identify-section" class="content-section" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-robot"></i> AI Product Identification</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="productImage" class="form-label">Upload Product Image</label>
+                                            <input type="file" class="form-control" id="productImage" accept="image/*">
+                                        </div>
+                                        <div class="mb-3">
+                                            <img id="imagePreview" class="img-fluid" style="display: none; max-height: 300px;">
+                                        </div>
+                                        <button class="btn btn-success" id="identifyProduct" disabled>
+                                            <i class="fas fa-search"></i> Identify Product
+                                        </button>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div id="identificationResults" class="alert alert-info" style="display: none;">
+                                            <h6>AI Identification Results:</h6>
+                                            <div id="aiResults"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Draft Generator Section -->
+                    <div id="draft-generator-section" class="content-section" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-edit"></i> Listing Draft Generator</h5>
+                            </div>
+                            <div class="card-body">
+                                <form id="draftForm">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="productTitle" class="form-label">Product Title</label>
+                                                <input type="text" class="form-control" id="productTitle">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="productCategory" class="form-label">Category</label>
+                                                <select class="form-select" id="productCategory">
+                                                    <option value="">Select Category</option>
+                                                    <option value="Electronics">Electronics</option>
+                                                    <option value="Fashion">Fashion</option>
+                                                    <option value="Home & Garden">Home & Garden</option>
+                                                    <option value="Sports">Sports</option>
+                                                    <option value="Collectibles">Collectibles</option>
+                                                </select>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="startingPrice" class="form-label">Starting Price ($)</label>
+                                                <input type="number" class="form-control" id="startingPrice" step="0.01">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="condition" class="form-label">Condition</label>
+                                                <select class="form-select" id="condition">
+                                                    <option value="New">New</option>
+                                                    <option value="Used">Used</option>
+                                                    <option value="Refurbished">Refurbished</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="productDescription" class="form-label">Description</label>
+                                                <textarea class="form-control" id="productDescription" rows="10"></textarea>
+                                            </div>
+                                            <button type="button" class="btn btn-info" id="generateDescription">
+                                                <i class="fas fa-magic"></i> Generate AI Description
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-save"></i> Save Draft
+                                    </button>
+                                    <button type="button" class="btn btn-primary ms-2" id="previewListing">
+                                        <i class="fas fa-eye"></i> Preview
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Settings Section -->
+                    <div id="settings-section" class="content-section" style="display: none;">
+                        <div class="card">
+                            <div class="card-header">
+                                <h5><i class="fas fa-cog"></i> Settings</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label for="huggingfaceToken" class="form-label">Hugging Face API Token (Optional)</label>
+                                    <input type="password" class="form-control" id="huggingfaceToken">
+                                    <div class="form-text">For enhanced AI features. Leave blank to use free tier.</div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="defaultShipping" class="form-label">Default Shipping Cost ($)</label>
+                                    <input type="number" class="form-control" id="defaultShipping" step="0.01" value="9.99">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="defaultHandling" class="form-label">Default Handling Time (days)</label>
+                                    <input type="number" class="form-control" id="defaultHandling" value="1">
+                                </div>
+                                <button class="btn btn-primary" id="saveSettings">
+                                    <i class="fas fa-save"></i> Save Settings
+                                </button>
+                                <button class="btn btn-warning ms-2" id="clearData">
+                                    <i class="fas fa-trash"></i> Clear All Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for listing details -->
+    <div class="modal fade" id="listingModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Listing</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="listingModalBody">
+                    <!-- Listing details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveListingChanges">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/ebay-api.js"></script>
+    <script src="js/ai-services.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
